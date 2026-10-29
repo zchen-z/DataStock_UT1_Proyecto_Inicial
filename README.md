@@ -34,7 +34,7 @@ Las rutas de los ficheros se escriben relativas a la raíz del proyecto (por eje
 | 4.1 | Listar todos los productos | RF-FIC-04 | Implementado |
 | 4.2 | Buscar producto por código | RF-FIC-04 | Implementado |
 | 4.3 | Buscar productos por nombre | RF-FIC-04 | Implementado |
-| 5.1 / 5.2 | Exportar productos a JSON / XML | RF-FIC-05 | Pendiente |
+| 5.1 / 5.2 | Exportar productos a JSON (Gson) / XML (DOM) | RF-FIC-05 | Implementado |
 | 6.1 / 6.2 | Guardar / recuperar inventario (.dat) | RF-FIC-06 | Pendiente |
 | Independiente | Consultas XPath (`XPathActividad`) | RF-FIC-07 | Pendiente |
 | Independiente | Acceso aleatorio (`AccesoAleatorioActividad`) | RF-FIC-08 | Pendiente |
@@ -62,7 +62,8 @@ DataStock_UT1_Proyecto_Inicial/
     ├── ficheros/
     │   ├── ExploradorFicheros.java       # RF-FIC-01 (NIO.2)
     │   ├── ImportadorJson.java           # RF-FIC-02 (Gson)
-    │   └── ImportadorXml.java            # RF-FIC-03 (DOM, protegido frente a XXE)
+    │   ├── ImportadorXml.java            # RF-FIC-03 (DOM, protegido frente a XXE)
+    │   └── ExportadorProductos.java      # RF-FIC-05 (Gson y DOM, UTF-8, ordenado por código)
     ├── servicio/
     │   ├── Inventario.java               # Colección común: alta sin duplicados y búsquedas
     │   ├── ValidadorProducto.java        # Reglas comunes de validación (JSON y XML)
@@ -88,6 +89,13 @@ DataStock_UT1_Proyecto_Inicial/
 - Los códigos **no se duplican** (ni en memoria ni dentro del mismo fichero), sin distinguir mayúsculas y sin espacios extremos. Un producto duplicado se rechaza y no sustituye al existente.
 - Importar **añade** productos: la colección no se vacía antes.
 
+## 5.1. Exportación
+
+- Se exportan todos los productos en memoria, **ordenados por código** y en **UTF-8**.
+- JSON con raíz `{"productos": [...]}`; XML con `catalogo/producto/campos` y sangría.
+- Antes de escribir se comprueba que hay productos, que la ruta no está vacía, que el directorio de destino existe y que se puede escribir. Si el fichero ya existe, se pide confirmación.
+- No hay conversor directo JSON↔XML: el modelo intermedio es la colección de objetos `Producto`.
+
 **Decisión propia:** el patrón del código admite también minúsculas (`[A-Za-z0-9-]+`), porque el enunciado indica que los códigos se comparan sin distinguir mayúsculas.
 
 ## 6. Pruebas
@@ -101,7 +109,8 @@ Las pruebas ejecutadas están documentadas en `DataStock_UT1_Registro_Pruebas.do
 | RF-FIC-03 | CP-XML-01 a 04 | Superadas |
 | RF-FIC-04 | CP-CON-01 a 03 | Superadas |
 | RF-FIC-04 | CP-CON-04 | No superada: se ejecutó importando solo el XML; pendiente de repetir importando JSON y XML (ver incidencias del registro) |
-| RF-FIC-05 a 08 | — | No ejecutadas (pendientes) |
+| RF-FIC-05 | CP-EXP-01 a 05 | Superadas |
+| RF-FIC-06 a 08 | — | No ejecutadas (sin implementar) |
 
 ## 7. Entrega
 

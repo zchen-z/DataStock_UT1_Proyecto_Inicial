@@ -9,6 +9,10 @@ import es.iesisidra.datastock.ficheros.ExploradorFicheros;
 import es.iesisidra.datastock.ficheros.ImportadorJson;
 import es.iesisidra.datastock.servicio.ResultadoImportacion;
 import es.iesisidra.datastock.ficheros.ImportadorXml;
+import es.iesisidra.datastock.ficheros.ExportadorProductos;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import es.iesisidra.datastock.modelo.Producto;
 import java.util.List;
 
@@ -26,6 +30,7 @@ public class MenuPrincipal {
     private final ExploradorFicheros explorador = new ExploradorFicheros();
     private final ImportadorJson importadorJson = new ImportadorJson();
     private final ImportadorXml importadorXml = new ImportadorXml();
+    private final ExportadorProductos exportador = new ExportadorProductos();
 
     /** @param inventario colección común de productos de esta ejecución. */
     public MenuPrincipal(Inventario inventario) {
@@ -222,13 +227,53 @@ public class MenuPrincipal {
             System.out.println("0. Volver al menú principal");
             opcion = LectorConsola.leerOpcion("Selecciona una opción: ", 0, 2);
             switch (opcion) {
-                case 1 -> pendiente("RF-FIC-05 · Exportar JSON");
-                case 2 -> pendiente("RF-FIC-05 · Exportar XML");
+                case 1 -> exportar("JSON");
+                case 2 -> exportar("XML");
                 case 0 -> {
                 }
                 default -> throw new IllegalStateException("Opción inesperada");
             }
         } while (opcion != 0);
+    }
+
+    /**
+     * Opciones 5.1 y 5.2 · RF-FIC-05: comprueba el inventario y la ruta, pide
+     * confirmación si el fichero existe y delega en ExportadorProductos.
+     *
+     * @param formato "JSON" o "XML"
+     */
+    private void exportar(String formato) {
+        System.out.println("\n===== EXPORTAR " + formato + " =====");
+        if (inventario.getProductos().isEmpty()) {
+            System.out.println("El inventario está vacío: no hay productos para exportar.");
+        } else {
+            String texto = LectorConsola.leerTexto("Ruta: ");
+            String error = exportador.comprobarDestino(texto);
+            if (error != null) {
+                System.out.println("ERROR: " + error);
+            } else {
+                Path ruta = Path.of(texto.trim()).toAbsolutePath();
+                if (Files.exists(ruta) && !LectorConsola.confirmar("El fichero ya existe. ¿Sobrescribir?")) {
+                    System.out.println("Exportación cancelada: el fichero original no se ha modificado.");
+                } else {
+                    List<Producto> productos = inventario.listarOrdenadosPorCodigo();
+                    try {
+                        if (formato.equals("JSON")) {
+                            exportador.exportarJson(productos, ruta);
+                        } else {
+                            exportador.exportarXml(productos, ruta);
+                        }
+                        System.out.println("Fichero generado correctamente.");
+                        System.out.println("Ruta: " + ruta);
+                        System.out.println("Formato: " + formato);
+                        System.out.println("Productos exportados: " + productos.size());
+                    } catch (IOException e) {
+                        System.out.println("ERROR al escribir el fichero: " + e.getMessage());
+                    }
+                }
+            }
+        }
+        LectorConsola.pausar();
     }
 
     private void menuSerializacion() {
