@@ -47,7 +47,7 @@ Las opciones pendientes siguen mostrando el mensaje `[PENDIENTE]` sin cerrar la 
 DataStock_UT1_Proyecto_Inicial/
 ├── pom.xml
 ├── README.md
-├── DataStock_UT1_Registro_Pruebas.docx   # Registro de pruebas ejecutadas
+├── DataStock_UT1_Registro_Pruebas.odt    # Registro de pruebas ejecutadas
 ├── evidencias/                           # Capturas de cada prueba (CP-xxx.png)
 ├── datos/
 │   ├── ejemplos/                         # Catálogos facilitados por la profesora
@@ -100,15 +100,14 @@ DataStock_UT1_Proyecto_Inicial/
 
 ## 6. Pruebas
 
-Las pruebas ejecutadas están documentadas en `DataStock_UT1_Registro_Pruebas.docx`, con sus capturas en `evidencias/`:
+Las pruebas ejecutadas están documentadas en `DataStock_UT1_Registro_Pruebas.odt`, con sus capturas en `evidencias/`:
 
 | Requisito | Pruebas | Estado |
 |---|---|---|
 | RF-FIC-01 | CP-FIC-01 a 03 | Superadas |
 | RF-FIC-02 | CP-JSON-01 a 04 | Superadas |
 | RF-FIC-03 | CP-XML-01 a 04 | Superadas |
-| RF-FIC-04 | CP-CON-01 a 03 | Superadas |
-| RF-FIC-04 | CP-CON-04 | No superada: se ejecutó importando solo el XML; pendiente de repetir importando JSON y XML (ver incidencias del registro) |
+| RF-FIC-04 | CP-CON-01 a 04 | Superadas (CP-CON-04 repetida importando JSON y XML) |
 | RF-FIC-05 | CP-EXP-01 a 05 | Superadas |
 | RF-FIC-06 a 08 | — | No ejecutadas (sin implementar) |
 
