@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalogo>
+  <producto>
+    <codigo>TEC-001</codigo><nombre>Teclado desde XML</nombre>
+    <precio>50.00</precio><stock>2</stock><categoriaId>1</categoriaId><proveedorId>1</proveedorId>
+  </producto>
+</catalogo>

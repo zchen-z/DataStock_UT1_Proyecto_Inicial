@@ -8,6 +8,7 @@ import es.iesisidra.datastock.ficheros.ExploradorFicheros;
 
 import es.iesisidra.datastock.ficheros.ImportadorJson;
 import es.iesisidra.datastock.servicio.ResultadoImportacion;
+import es.iesisidra.datastock.ficheros.ImportadorXml;
 
 /**
  * Presentación de menús y navegación de la primera fase de DataStock.
@@ -18,9 +19,11 @@ import es.iesisidra.datastock.servicio.ResultadoImportacion;
  * </p>
  */
 public class MenuPrincipal {
+
     private final Inventario inventario;
     private final ExploradorFicheros explorador = new ExploradorFicheros();
     private final ImportadorJson importadorJson = new ImportadorJson();
+    private final ImportadorXml importadorXml = new ImportadorXml();
 
     /** @param inventario colección común de productos de esta ejecución. */
     public MenuPrincipal(Inventario inventario) {
@@ -43,7 +46,7 @@ public class MenuPrincipal {
             switch (opcion) {
                 case 1 -> explorarRuta();
                 case 2 -> importarJson();
-                case 3 -> pendiente("RF-FIC-03 · Importar productos desde XML");
+                case 3 -> importarXml();
                 case 4 -> menuConsultas();
                 case 5 -> menuExportaciones();
                 case 6 -> menuSerializacion();
@@ -54,8 +57,8 @@ public class MenuPrincipal {
     }
 
     /**
-     * Opción 1. RF-FIC-01.
-     * Pide la ruta al usuario y hace la exploración en ExploradorFicheros.
+     * Opción 1. RF-FIC-01.Pide la ruta al usuario y hace la exploración en
+     * ExploradorFicheros.
      */
     private void explorarRuta() {
         System.out.println("\n===== EXPLORAR RUTA =====");
@@ -77,6 +80,19 @@ public class MenuPrincipal {
     }
 
     /**
+     * Opción 3 · RF-FIC-03: pide la ruta, delega en ImportadorXml y muestra el
+     * resumen.
+     */
+    private void importarXml() {
+        System.out.println("\n===== IMPORTAR XML =====");
+        String ruta = LectorConsola.leerTexto("Ruta: ");
+        System.out.println("Leyendo documento XML...");
+        ResultadoImportacion resultado = importadorXml.importar(ruta, inventario);
+        mostrarResumen(resultado);
+        LectorConsola.pausar();
+    }
+
+    /**
      * Muestra el resumen de una importación (JSON o XML):
      * contadores, incidencias o el error que ha cancelado el documento.
      */
@@ -86,7 +102,8 @@ public class MenuPrincipal {
             System.out.println("Importación cancelada: no se ha añadido ningún producto.");
         } else {
             System.out.println("Productos encontrados: " + resultado.getEncontrados());
-            System.out.println("Importados: " + resultado.getImportados() + " | Rechazados: " + resultado.getRechazados());
+            System.out.println(
+                    "Importados: " + resultado.getImportados() + " | Rechazados: " + resultado.getRechazados());
             if (resultado.getIncidencias().isEmpty()) {
                 System.out.println("Importación finalizada.");
             } else {

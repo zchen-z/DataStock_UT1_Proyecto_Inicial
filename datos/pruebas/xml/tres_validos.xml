@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalogo>
+  <producto>
+    <codigo>TEC-030</codigo><nombre>Teclado inalámbrico</nombre>
+    <precio>32.50</precio><stock>9</stock><categoriaId>1</categoriaId><proveedorId>2</proveedorId>
+  </producto>
+  <producto>
+    <codigo>RAT-031</codigo><nombre>Ratón vertical</nombre>
+    <precio>27.90</precio><stock>14</stock><categoriaId>1</categoriaId><proveedorId>2</proveedorId>
+  </producto>
+  <producto>
+    <codigo>MON-032</codigo><nombre>Monitor 32 pulgadas</nombre>
+    <precio>289.00</precio><stock>3</stock><categoriaId>2</categoriaId><proveedorId>1</proveedorId>
+  </producto>
+</catalogo>

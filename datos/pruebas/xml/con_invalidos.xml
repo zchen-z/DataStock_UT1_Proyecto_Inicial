@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalogo>
+  <producto>
+    <codigo>HUB-040</codigo><nombre>Hub USB 4 puertos</nombre>
+    <precio>15.99</precio><stock>20</stock><categoriaId>3</categoriaId><proveedorId>1</proveedorId>
+  </producto>
+  <producto>
+    <codigo>SSD-041</codigo><nombre>Disco SSD 1TB</nombre>
+    <precio>abc</precio><stock>7</stock><categoriaId>4</categoriaId><proveedorId>2</proveedorId>
+  </producto>
+  <producto>
+    <codigo>CAM-042</codigo><nombre>Cámara web</nombre>
+    <precio>39.90</precio><stock>-2</stock><categoriaId>3</categoriaId><proveedorId>1</proveedorId>
+  </producto>
+  <producto>
+    <codigo>MIC-043</codigo>
+    <precio>22.00</precio><stock>5</stock><categoriaId>3</categoriaId><proveedorId>1</proveedorId>
+  </producto>
+</catalogo>
