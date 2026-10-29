@@ -1,0 +1,7 @@
+{
+  "productos": [
+    {"codigo":"TEC-010","nombre":"Teclado","precio":24.33,"stock":10,"categoriaId":1,"proveedorId":1},
+    {"codigo":"RAT-011","nombre":"Ratón","precio":9.99,"stock":22,"categoriaId":1,"proveedorId":2},
+    {"codigo":"MON-012","nombre":"Monitor","precio":333.33,"stock":33,"categoriaId":2,"proveedorId":2}
+  ]
+}

@@ -25,16 +25,16 @@ public class ExploradorFicheros {
                 Path ruta = Path.of(textoRuta.trim()); // Convierte el texto en un objeto Path, para que NIO pueda representar una ruta
 
                 if(!Files.exists(ruta)){
-                    System.out.println("Error. La ruta no existe: " + ruta.toAbsolutePath());
+                    System.out.println("Error: La ruta no existe: " + ruta.toAbsolutePath());
                 }else if(Files.isRegularFile(ruta)){
                     mostrarFichero(ruta);
                 }else if(Files.isDirectory(ruta)){
                     mostrarDirectorio(ruta);
                 }else{
-                    System.out.println("Error. La ruta no es ni fichero ni directorio");
+                    System.out.println("Error: La ruta no es ni fichero ni directorio");
                 }
             } catch (InvalidPathException e) {
-                System.out.println("ERROR. La ruta no es válida: " + e.getMessage());
+                System.out.println("ERROR: La ruta no es válida: " + e.getMessage());
             }
         }
     }
@@ -50,7 +50,7 @@ private void mostrarFichero(Path fichero) {
         System.out.println("Ruta absoluta: " + fichero.toAbsolutePath());
         System.out.println("Tamaño: " + Files.size(fichero) + " bytes"); //Este puede fallar por ejemplo si no tienes permisos o el fichero se borra justo en ese momento, y lanza IOException que es obligatoiro capturar con tryCatch.
     } catch (IOException e) {
-        System.out.println("ERROR. No se pudo leer el fichero: " + e.getMessage());
+        System.out.println("ERROR: No se pudo leer el fichero: " + e.getMessage());
     }
 }
 
@@ -62,7 +62,7 @@ private void mostrarFichero(Path fichero) {
  */
 private void mostrarDirectorio(Path directorio) {
     if (!Files.isReadable(directorio)) {
-        System.out.println("ERROR. No tienes permisos para leer: " + directorio.toAbsolutePath());
+        System.out.println("ERROR: No tienes permisos para leer: " + directorio.toAbsolutePath());
     } else {
         List<Path> hijos = new ArrayList<>();
 

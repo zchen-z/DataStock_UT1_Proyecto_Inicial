@@ -1,0 +1,9 @@
+{
+  "productos": [
+    {"codigo":"AUR-020","nombre":"Auriculares","precio":29.33,"stock":15,"categoriaId":3,"proveedorId":1},
+    {"codigo":"ALT-021","nombre":"Altavoces","precio":34.30,"stock":8,"categoriaId":3,"proveedorId":1},
+    {"codigo":"WEB-022","nombre":"Webcam","precio":45.00,"stock":12,"categoriaId":3,"proveedorId":2},
+    {"codigo":"TEC-023","nombre":"Teclado gaming","precio":-3,"stock":5,"categoriaId":1,"proveedorId":1},
+    {"codigo":"","nombre":"Producto sin código","precio":33.00,"stock":3,"categoriaId":1,"proveedorId":1}
+  ]
+}
