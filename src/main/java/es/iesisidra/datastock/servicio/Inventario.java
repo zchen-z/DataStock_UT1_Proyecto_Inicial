@@ -67,4 +67,34 @@ public class Inventario {
         }
         return anadido;
     }
+
+    /**
+     * Devuelve una copia de los productos ordenada por código.
+     * La colección original no se modifica.
+     * @return lista nueva ordenada por código (sin distinguir mayúsculas)
+     */
+    public List<Producto> listarOrdenadosPorCodigo() {
+        List<Producto> copia = new ArrayList<>(productos);
+        copia.sort((a, b) -> a.getCodigo().compareToIgnoreCase(b.getCodigo()));
+        return copia;
+    }
+
+    /**
+     * Busca los productos cuyo nombre contiene el texto indicado,
+     * sin distinguir mayúsculas. El resultado se devuelve ordenado por código.
+     * @param texto fragmento del nombre a buscar
+     * @return lista de coincidencias; vacía si no hay ninguna o el texto está vacío
+     */
+    public List<Producto> buscarPorNombre(String texto) {
+        List<Producto> coincidencias = new ArrayList<>();
+        if (texto != null && !texto.isBlank()) {
+            String buscado = texto.trim().toLowerCase();
+            for (Producto p : listarOrdenadosPorCodigo()) {
+                if (p.getNombre().toLowerCase().contains(buscado)) {
+                    coincidencias.add(p);
+                }
+            }
+        }
+        return coincidencias;
+    }
 }

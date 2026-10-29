@@ -9,6 +9,8 @@ import es.iesisidra.datastock.ficheros.ExploradorFicheros;
 import es.iesisidra.datastock.ficheros.ImportadorJson;
 import es.iesisidra.datastock.servicio.ResultadoImportacion;
 import es.iesisidra.datastock.ficheros.ImportadorXml;
+import es.iesisidra.datastock.modelo.Producto;
+import java.util.List;
 
 /**
  * Presentación de menús y navegación de la primera fase de DataStock.
@@ -137,14 +139,78 @@ public class MenuPrincipal {
             System.out.println("0. Volver al menú principal");
             opcion = LectorConsola.leerOpcion("Selecciona una opción: ", 0, 3);
             switch (opcion) {
-                case 1 -> pendiente("RF-FIC-04 · Listar productos");
-                case 2 -> pendiente("RF-FIC-04 · Buscar por código");
-                case 3 -> pendiente("RF-FIC-04 · Buscar por nombre");
+                case 1 -> listarProductos();
+                case 2 -> buscarPorCodigo();
+                case 3 -> buscarPorNombre();
                 case 0 -> {
                 }
                 default -> throw new IllegalStateException("Opción inesperada");
             }
         } while (opcion != 0);
+    }
+
+    /** Opción 4.1 · RF-FIC-04: lista todos los productos ordenados por código. */
+    private void listarProductos() {
+        List<Producto> lista = inventario.listarOrdenadosPorCodigo();
+        if (lista.isEmpty()) {
+            System.out.println("El inventario está vacío. Importa primero un catálogo JSON o XML.");
+        } else {
+            mostrarTabla(lista);
+        }
+        LectorConsola.pausar();
+    }
+
+    /** Opción 4.2 · RF-FIC-04: busca un producto por su código exacto. */
+    private void buscarPorCodigo() {
+        if (inventario.getProductos().isEmpty()) {
+            System.out.println("El inventario está vacío. Importa primero un catálogo JSON o XML.");
+        } else {
+            String codigo = LectorConsola.leerTexto("Código: ");
+            if (codigo.isBlank()) {
+                System.out.println("El código no puede estar vacío.");
+            } else {
+                Producto p = inventario.buscarPorCodigo(codigo);
+                if (p == null) {
+                    System.out.println("No existe ningún producto con el código " + codigo.trim() + ".");
+                } else {
+                    System.out.println("Código: " + p.getCodigo());
+                    System.out.println("Nombre: " + p.getNombre());
+                    System.out.println("Precio: " + p.getPrecio() + " EUR | Stock: " + p.getStock());
+                    System.out.println("Categoría: " + p.getCategoriaId() + " | Proveedor: " + p.getProveedorId());
+                }
+            }
+        }
+        LectorConsola.pausar();
+    }
+
+    /** Opción 4.3 · RF-FIC-04: busca productos cuyo nombre contenga un texto. */
+    private void buscarPorNombre() {
+        if (inventario.getProductos().isEmpty()) {
+            System.out.println("El inventario está vacío. Importa primero un catálogo JSON o XML.");
+        } else {
+            String texto = LectorConsola.leerTexto("Texto a buscar: ");
+            if (texto.isBlank()) {
+                System.out.println("El texto de búsqueda no puede estar vacío.");
+            } else {
+                List<Producto> encontrados = inventario.buscarPorNombre(texto);
+                if (encontrados.isEmpty()) {
+                    System.out.println("No hay productos cuyo nombre contenga \"" + texto.trim() + "\".");
+                } else {
+                    mostrarTabla(encontrados);
+                }
+            }
+        }
+        LectorConsola.pausar();
+    }
+
+    /** Muestra una lista de productos en forma de tabla. */
+    private void mostrarTabla(List<Producto> lista) {
+        System.out.printf("%-12s %-25s %12s %6s %5s %5s%n", "CÓDIGO", "NOMBRE", "PRECIO", "STOCK", "CAT", "PROV");
+        for (Producto p : lista) {
+            System.out.printf("%-12s %-25s %8s EUR %6d %5d %5d%n", p.getCodigo(), p.getNombre(),
+                    p.getPrecio(), p.getStock(), p.getCategoriaId(), p.getProveedorId());
+        }
+        System.out.println("Total: " + lista.size() + " producto(s)");
     }
 
     private void menuExportaciones() {
