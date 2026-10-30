@@ -1,20 +1,20 @@
 package es.iesisidra.datastock.ui;
 
-import es.iesisidra.datastock.servicio.Inventario;
-import es.iesisidra.datastock.util.ColoresConsola;
-import es.iesisidra.datastock.util.LectorConsola;
-
-import es.iesisidra.datastock.ficheros.ExploradorFicheros;
-
-import es.iesisidra.datastock.ficheros.ImportadorJson;
-import es.iesisidra.datastock.servicio.ResultadoImportacion;
-import es.iesisidra.datastock.ficheros.ImportadorXml;
-import es.iesisidra.datastock.ficheros.ExportadorProductos;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import es.iesisidra.datastock.modelo.Producto;
 import java.util.List;
+
+import es.iesisidra.datastock.ficheros.ExploradorFicheros;
+import es.iesisidra.datastock.ficheros.ExportadorProductos;
+import es.iesisidra.datastock.ficheros.ImportadorJson;
+import es.iesisidra.datastock.ficheros.ImportadorXml;
+import es.iesisidra.datastock.ficheros.SerializadorInventario;
+import es.iesisidra.datastock.modelo.Producto;
+import es.iesisidra.datastock.servicio.Inventario;
+import es.iesisidra.datastock.servicio.ResultadoImportacion;
+import es.iesisidra.datastock.util.ColoresConsola;
+import es.iesisidra.datastock.util.LectorConsola;
 
 /**
  * Presentación de menús y navegación de la primera fase de DataStock.
@@ -31,6 +31,7 @@ public class MenuPrincipal {
     private final ImportadorJson importadorJson = new ImportadorJson();
     private final ImportadorXml importadorXml = new ImportadorXml();
     private final ExportadorProductos exportador = new ExportadorProductos();
+    private final SerializadorInventario serializador = new SerializadorInventario();
 
     /** @param inventario colección común de productos de esta ejecución. */
     public MenuPrincipal(Inventario inventario) {
@@ -285,13 +286,105 @@ public class MenuPrincipal {
             System.out.println("0. Volver al menú principal");
             opcion = LectorConsola.leerOpcion("Selecciona una opción: ", 0, 2);
             switch (opcion) {
-                case 1 -> pendiente("RF-FIC-06 · Guardar inventario");
-                case 2 -> pendiente("RF-FIC-06 · Recuperar inventario");
+                case 1 -> guardarInventario();
+                case 2 -> recuperarInventario();
                 case 0 -> {
                 }
                 default -> throw new IllegalStateException("Opción inesperada");
             }
         } while (opcion != 0);
+    }
+
+    /**
+     * Opción 6.1 · RF-FIC-06: guarda el inventario completo en un fichero .dat
+     * mediante serialización. Si el inventario está vacío no se crea ningún fichero.
+     */
+    private void guardarInventario() {
+        System.out.println("\n===== GUARDAR INVENTARIO =====");
+        if (inventario.getProductos().isEmpty()) {
+            System.out.println("El inventario está vacío: no se crea ningún fichero.");
+        } else {
+            String texto = LectorConsola.leerTexto("Ruta: ");
+            String error = exportador.comprobarDestino(texto);
+            if (error != null) {
+                System.out.println("ERROR: " + error);
+            } else {
+                Path ruta = Path.of(texto.trim()).toAbsolutePath();
+                if (Files.exists(ruta) && !LectorConsola.confirmar("El fichero ya existe. ¿Sobrescribir?")) {
+                    System.out.println("Guardado cancelado: el fichero original no se ha modificado.");
+                } else {
+                    try {
+                        serializador.guardar(inventario.getProductos(), ruta);
+                        System.out.println("Inventario guardado correctamente en " + ruta);
+                        System.out.println("Productos guardados: " + inventario.getProductos().size());
+                    } catch (IOException e) {
+                        System.out.println("ERROR al escribir el fichero: " + e.getMessage());
+                    }
+                }
+            }
+        }
+        LectorConsola.pausar();
+    }
+
+    /**
+     * Opción 6.2 · RF-FIC-06: recupera un fichero .dat y sustituye el inventario,
+     * pidiendo confirmación si ya hay productos. Si la lectura falla, la memoria no cambia.
+     */
+    private void recuperarInventario() {
+        System.out.println("\n===== RECUPERAR INVENTARIO =====");
+        String texto = LectorConsola.leerTexto("Ruta: ");
+        Path ruta = comprobarFicheroLectura(texto);
+        if (ruta != null) {
+            try {
+                List<Producto> recuperados = serializador.recuperar(ruta);
+                boolean sustituir = true;
+                if (!inventario.getProductos().isEmpty()) {
+                    System.out.println("Actualmente hay " + inventario.getProductos().size() + " productos en memoria.");
+                    System.out.println("La recuperación sustituirá el inventario actual.");
+                    sustituir = LectorConsola.confirmar("¿Continuar?");
+                }
+                if (sustituir) {
+                    inventario.sustituirTodos(recuperados);
+                    System.out.println("Inventario recuperado correctamente.");
+                    System.out.println("Productos disponibles: " + inventario.getProductos().size());
+                } else {
+                    System.out.println("Recuperación cancelada: se conserva el inventario actual.");
+                }
+            } catch (IOException e) {
+                System.out.println("ERROR: el fichero está dañado o no es compatible (" + e.getMessage() + ").");
+                System.out.println("El inventario en memoria no se ha modificado.");
+            }
+        }
+        LectorConsola.pausar();
+    }
+
+    /**
+     * Comprueba que la ruta indicada es un fichero existente que se puede leer.
+     *
+     * @param texto ruta escrita por el usuario
+     * @return la ruta, o null si no es válida (ya se ha mostrado el motivo)
+     */
+    private Path comprobarFicheroLectura(String texto) {
+        Path ruta = null;
+        if (texto == null || texto.isBlank()) {
+            System.out.println("ERROR: la ruta no puede estar vacía");
+        } else {
+            try {
+                Path candidata = Path.of(texto.trim()).toAbsolutePath();
+                if (!Files.exists(candidata)) {
+                    System.out.println("ERROR: el fichero no existe: " + candidata);
+                } else if (!Files.isRegularFile(candidata)) {
+                    System.out.println("ERROR: la ruta no es un fichero");
+                } else if (!Files.isReadable(candidata)) {
+                    System.out.println("ERROR: no tienes permisos para leer el fichero");
+                } else {
+                    ruta = candidata;
+                }
+            } catch (java.nio.file.InvalidPathException e) {
+                System.out.println("ERROR: la ruta no es válida");
+            }
+        }
+        return ruta;
     }
 
     /**

@@ -1,8 +1,9 @@
 package es.iesisidra.datastock.servicio;
 
-import es.iesisidra.datastock.modelo.Producto;
 import java.util.ArrayList;
 import java.util.List;
+
+import es.iesisidra.datastock.modelo.Producto;
 
 /**
  * Estado común del inventario durante la ejecución de UT1.
@@ -29,6 +30,7 @@ public class Inventario {
     /**
      * Busca un producto por su código, sin distinguir mayúsculas
      * y eliminando espacios al principio y al final.
+     * 
      * @param codigo código a buscar
      * @return el producto encontrado, o null si no existe
      */
@@ -47,6 +49,7 @@ public class Inventario {
 
     /**
      * Indica si ya hay un producto con ese código en el inventario.
+     * 
      * @param codigo código a comprobar
      * @return true si el código ya existe
      */
@@ -56,6 +59,7 @@ public class Inventario {
 
     /**
      * Añade un producto solo si su código no existe todavía.
+     * 
      * @param producto producto ya validado
      * @return true si se ha añadido, false si era un duplicado
      */
@@ -71,6 +75,7 @@ public class Inventario {
     /**
      * Devuelve una copia de los productos ordenada por código.
      * La colección original no se modifica.
+     * 
      * @return lista nueva ordenada por código (sin distinguir mayúsculas)
      */
     public List<Producto> listarOrdenadosPorCodigo() {
@@ -82,6 +87,7 @@ public class Inventario {
     /**
      * Busca los productos cuyo nombre contiene el texto indicado,
      * sin distinguir mayúsculas. El resultado se devuelve ordenado por código.
+     * 
      * @param texto fragmento del nombre a buscar
      * @return lista de coincidencias; vacía si no hay ninguna o el texto está vacío
      */
@@ -96,5 +102,15 @@ public class Inventario {
             }
         }
         return coincidencias;
+    }
+
+    /**
+     * Sustituye todo el inventario por los productos indicados.
+     * Se usa al recuperar un fichero .dat (RF-FIC-06).
+     * @param nuevos productos que pasan a formar el inventario
+     */
+    public void sustituirTodos(List<Producto> nuevos) {
+        productos.clear();
+        productos.addAll(nuevos);
     }
 }
