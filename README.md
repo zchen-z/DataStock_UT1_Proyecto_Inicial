@@ -140,8 +140,8 @@ Las pruebas ejecutadas están documentadas en `DataStock_UT1_Registro_Pruebas.od
 | RF-FIC-05 | CP-EXP-01 a 05 | Superadas |
 | RF-FIC-06 | CP-SER-01 a 04 | Superadas |
 | RF-FIC-07 | CP-XPATH-01 a 05 | Superadas |
-| RF-FIC-08 | CP-RAF-01 a 05 | 01 a 04 superadas; CP-RAF-05 pendiente de repetir (el fichero de 50 bytes se subió vacío) |
+| RF-FIC-08 | CP-RAF-01 a 05 | Superadas |
 
 ## 7. Entrega
 
-La versión entregada en plazo de la UT1 se identifica con la etiqueta Git **`v1-UT1`** (RF-FIC-01 a 05). RF-FIC-06, 07 y 08 se completaron después, en commits posteriores.
+La versión entregada en plazo de la UT1 se identifica con la etiqueta Git **`v1.1-UT1`** 
