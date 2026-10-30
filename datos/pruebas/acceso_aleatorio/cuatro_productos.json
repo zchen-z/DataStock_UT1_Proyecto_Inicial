@@ -1,0 +1,8 @@
+{
+  "productos": [
+    {"codigo":"AUR-001","nombre":"Auriculares USB","precio":29.95,"stock":15,"categoriaId":3,"proveedorId":1},
+    {"codigo":"CAB-002","nombre":"Cable HDMI","precio":7.99,"stock":40,"categoriaId":3,"proveedorId":2},
+    {"codigo":"MON-003","nombre":"Monitor 24 pulgadas","precio":149.99,"stock":8,"categoriaId":2,"proveedorId":2},
+    {"codigo":"TEC-004","nombre":"Teclado mecánico","precio":59.90,"stock":12,"categoriaId":1,"proveedorId":1}
+  ]
+}
