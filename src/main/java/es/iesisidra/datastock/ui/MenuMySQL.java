@@ -12,6 +12,7 @@ import static es.iesisidra.datastock.util.ColoresConsola.error;
 import static es.iesisidra.datastock.util.ColoresConsola.ok;
 import es.iesisidra.datastock.util.LectorConsola;
 
+
 /**
  * Opción 7 del menú principal: funcionalidades de MySQL (UT2).
  */
@@ -21,6 +22,7 @@ public class MenuMySQL {
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final MenuCategorias menuCategorias = new MenuCategorias();
     private final MenuProveedores menuProveedores = new MenuProveedores();
+    private final MenuProductos menuProductos = new MenuProductos();
 
     /** @param inventario inventario en memoria de la UT1 */
     public MenuMySQL(Inventario inventario) {
@@ -47,6 +49,7 @@ public class MenuMySQL {
                 case 1 -> comprobarConexion();
                 case 2 -> menuCategorias.iniciar();
                 case 3 -> menuProveedores.iniciar();
+                case 4 -> menuProductos.iniciar();
                 default -> aviso("Opción pendiente de implementar.");
             }
         } while (opcion != 0);

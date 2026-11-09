@@ -14,6 +14,8 @@ public class ValidadorProducto {
 
     /** Patron de letras, numeros y guiones (no distigue mayusculas). */
     private static final String PATRON_CODIGO = "[A-Za-z0-9-]+"; // permiten letras, numeros o guiones; + = uno o mas
+    /** Mayor precio que admite DECIMAL(10,2) en MySQL. */
+    private static final BigDecimal PRECIO_MAXIMO = new BigDecimal("99999999.99");
 
     /**
      * Comprueba todos los campos de un producto.
@@ -65,11 +67,15 @@ public class ValidadorProducto {
     /**
      * Precio: obligatorio y mayor que 0.
      */
-    private void validarPrecio(BigDecimal precio, List<String> errores) {
+        private void validarPrecio(BigDecimal precio, List<String> errores) {
         if (precio == null) {
             errores.add("el precio es obligatorio");
-        } else if (precio.compareTo(BigDecimal.ZERO) <= 0) { // BigDecimal es un objeto, no admite '<' ni '>'. Se usa compareTo, que devuelve -1 (menor), 0 (igual) o 1 (mayor).
+        } else if (precio.compareTo(BigDecimal.ZERO) <= 0) {
             errores.add("el precio debe ser mayor que 0");
+        } else if (precio.stripTrailingZeros().scale() > 2) { // 12.345 tiene 3 decimales
+            errores.add("el precio no puede tener más de dos decimales");
+        } else if (precio.compareTo(PRECIO_MAXIMO) > 0) {
+            errores.add("el precio supera el máximo permitido (99999999.99)");
         }
     }
 }
