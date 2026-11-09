@@ -32,10 +32,12 @@ public class MenuPrincipal {
     private final ImportadorXml importadorXml = new ImportadorXml();
     private final ExportadorProductos exportador = new ExportadorProductos();
     private final SerializadorInventario serializador = new SerializadorInventario();
+    private final MenuMySQL menuMySQL;
 
     /** @param inventario colección común de productos de esta ejecución. */
     public MenuPrincipal(Inventario inventario) {
         this.inventario = inventario;
+        this.menuMySQL = new MenuMySQL(inventario);
     }
 
     /** Ejecuta el menú principal hasta que el usuario selecciona salir. */
@@ -49,8 +51,9 @@ public class MenuPrincipal {
             System.out.println("4. Consultar productos");
             System.out.println("5. Exportar productos");
             System.out.println("6. Guardar y recuperar inventario");
+            System.out.println("7. Gestionar base de datos MySQL");
             System.out.println("0. Salir");
-            opcion = LectorConsola.leerOpcion("Selecciona una opción: ", 0, 6);
+            opcion = LectorConsola.leerOpcion("Selecciona una opción: ", 0, 7);
             switch (opcion) {
                 case 1 -> explorarRuta();
                 case 2 -> importarJson();
@@ -58,6 +61,7 @@ public class MenuPrincipal {
                 case 4 -> menuConsultas();
                 case 5 -> menuExportaciones();
                 case 6 -> menuSerializacion();
+                case 7 -> menuMySQL.iniciar();
                 case 0 -> System.out.println(ColoresConsola.pintar("Hasta pronto.", ColoresConsola.VERDE));
                 default -> throw new IllegalStateException("Opción inesperada");
             }
