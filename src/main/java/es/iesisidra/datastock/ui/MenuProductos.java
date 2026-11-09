@@ -18,7 +18,8 @@ import static es.iesisidra.datastock.util.ColoresConsola.error;
 import static es.iesisidra.datastock.util.ColoresConsola.ok;
 
 /**
- * Opción 7.4 · RF-JDBC-03: alta, consulta, modificación y baja de productos en MySQL.
+ * Opción 7.4 · RF-JDBC-03: alta, consulta, modificación y baja de productos en
+ * MySQL.
  */
 public class MenuProductos {
 
@@ -45,7 +46,8 @@ public class MenuProductos {
                     case 2 -> consultar();
                     case 3 -> modificar();
                     case 4 -> eliminar();
-                    case 0 -> { }
+                    case 0 -> {
+                    }
                     default -> throw new IllegalStateException("Opción inesperada");
                 }
             } catch (SQLException e) {
@@ -54,7 +56,10 @@ public class MenuProductos {
         } while (opcion != 0);
     }
 
-    /** Pide los seis datos, los valida y comprueba código, categoría y proveedor antes de insertar. */
+    /**
+     * Pide los seis datos, los valida y comprueba código, categoría y proveedor
+     * antes de insertar.
+     */
     private void alta() throws SQLException {
         System.out.println("\nALTA DE PRODUCTO");
         String codigo = LectorConsola.leerTexto("Código: ").trim().toUpperCase(); // tec-001 → TEC-001
@@ -96,7 +101,10 @@ public class MenuProductos {
         }
     }
 
-    /** Cambia nombre, precio, categoría y proveedor. Intro conserva cada valor; código y stock no se cambian. */
+    /**
+     * Cambia nombre, precio, categoría y proveedor. Intro conserva cada valor;
+     * código y stock no se cambian.
+     */
     private void modificar() throws SQLException {
         String codigo = LectorConsola.leerTexto("Código: ").trim().toUpperCase();
         Producto p = dao.buscarPorCodigo(codigo);
@@ -141,7 +149,9 @@ public class MenuProductos {
         }
     }
 
-    /** Muestra el producto, pide confirmación y lo borra si no tiene movimientos. */
+    /**
+     * Muestra el producto, pide confirmación y lo borra si no tiene movimientos.
+     */
     private void eliminar() throws SQLException {
         String codigo = LectorConsola.leerTexto("Código: ").trim().toUpperCase();
         Producto p = dao.buscarPorCodigo(codigo);
@@ -170,13 +180,17 @@ public class MenuProductos {
     }
 
     /**
-     * Valida los datos (reglas de la UT1 + 2 decimales) y que existan la categoría y el proveedor.
+     * Valida los datos (reglas de la UT1 + 2 decimales) y que existan la categoría
+     * y el proveedor.
      *
      * @return el motivo del rechazo, o null si el producto se puede guardar
      */
     private String comprobar(Producto p) throws SQLException {
         List<String> errores = validador.validar(p);
-        String problema = errores.isEmpty() ? null : String.join("; ", errores);
+        String problema = null;
+        if (!errores.isEmpty()) {
+            problema = String.join("; ", errores);
+        }
         if (problema == null && categoriaDAO.buscarPorId(p.getCategoriaId()) == null) {
             problema = "no existe la categoría con ID " + p.getCategoriaId();
         }
@@ -186,7 +200,10 @@ public class MenuProductos {
         return problema;
     }
 
-    /** Imprime todos los datos del producto con los nombres de categoría y proveedor. */
+    /**
+     * Imprime todos los datos del producto con los nombres de categoría y
+     * proveedor.
+     */
     private void mostrarFicha(Producto p) throws SQLException {
         Categoria c = categoriaDAO.buscarPorId(p.getCategoriaId());
         Proveedor pr = proveedorDAO.buscarPorId(p.getProveedorId());

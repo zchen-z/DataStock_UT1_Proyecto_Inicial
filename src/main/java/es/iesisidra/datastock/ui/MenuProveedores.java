@@ -165,8 +165,12 @@ public class MenuProveedores {
         return problema;
     }
 
-    /** @return el email, o «—» si no tiene */
+        /** @return el email, o "—" si no tiene */
     private String mostrarEmail(String email) {
-        return email == null ? "—" : email;
+        String texto = "—";
+        if (email != null) {
+            texto = email;
+        }
+        return texto;
     }
 }
