@@ -1,147 +1,102 @@
-# DataStock – UT1 · Ficheros y formatos de intercambio de datos
+# DataStock – Acceso a Datos (UT1 y UT2)
 
-**Módulo:** Acceso a Datos · 2.º DAM · IES Isidra de Guzmán · Curso 2026–2027  
-**Lenguaje:** Java 21 · **Construcción:** Maven · **Interfaz:** consola
+**2.º DAM · IES Isidra de Guzmán · 2026–2027** · Java 21 · Maven · consola
 
-Aplicación de consola para gestionar el inventario de una pequeña empresa. En esta primera fase (UT1) lee catálogos JSON y XML, valida los productos, los guarda en una colección en memoria, permite consultarlos y exportarlos, y guarda y recupera el inventario con serialización. Incluye dos actividades independientes: consultas XPath y acceso aleatorio a un fichero binario. No se conecta a MySQL.
+Aplicación de consola para gestionar un inventario. La **UT1** trabaja con ficheros y un inventario **en memoria** (opciones 1–6). La **UT2** añade la opción **7**, que trabaja con **MySQL** mediante **JDBC**.
 
-## 1. Requisitos previos
+## 1. Requisitos
 
-- JDK **21** (`java -version`).
-- Maven, o VS Code con la extensión **Extension Pack for Java** (incluye Maven).
-- Conexión a Internet la primera vez, para descargar Gson.
+- JDK 21 y Maven (o VS Code con Extension Pack for Java).
+- MySQL **8.0.16 o posterior** (probado con 8.0.46).
+- Dependencias en `pom.xml`: Gson 2.11.0, **MySQL Connector/J 9.1.0** y **sqlite-jdbc 3.46.1.3**.
 
-## 2. Cómo ejecutar
+## 2. Preparar la base de datos
 
-**Desde VS Code:** abrir la carpeta que contiene `pom.xml`, esperar a que se importe el proyecto Maven y ejecutar `es.iesisidra.datastock.App` con **Run**.
+Ejecutar `material_referencia/DataStock_BD_MySQL.sql` (en Workbench con ⚡, o `mysql -u root -p < material_referencia/DataStock_BD_MySQL.sql`). Crea la base de datos `datastock`, las tablas `categoria`, `proveedor`, `producto` y `movimiento_stock`, y el procedimiento `registrar_movimiento`. Las restricciones del script no se han modificado.
 
-**Desde terminal** (en la raíz del proyecto):
+## 3. Configurar la conexión
+
+Copiar `db.properties.example` como **`db.properties`** en la raíz del proyecto y poner los datos del MySQL local:
+
+```properties
+db.url=jdbc:mysql://localhost:3306/datastock
+db.user=root
+db.password=TU_CONTRASEÑA
+```
+
+`db.properties` está en `.gitignore`, así que la contraseña **no se sube** a GitHub.
+
+## 4. Ejecutar
+
+Abrir en VS Code la carpeta que contiene `pom.xml` y ejecutar `es.iesisidra.datastock.App`. Desde terminal:
 
 ```bash
 mvn clean compile
 mvn exec:java
 ```
 
-Las rutas de los ficheros se escriben relativas a la raíz del proyecto (por ejemplo `datos/ejemplos/catalogo_valido.json`) o como rutas absolutas.
-
-**Actividades independientes** (no están en el menú principal): en VS Code, abrir su `App.java` y pulsar **Run**; o desde terminal:
+Actividades independientes:
 
 ```bash
-mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.rf07.App
-mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.rf08.App
+mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.rf07.App       # XPath
+mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.rf08.App       # RandomAccessFile
+mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.DemoSQLite     # SQLite
 ```
 
-## 3. Menú y requisitos
+## 5. Menús
 
-| Menú | Operación | Requisito | Estado |
-|---|---|---|---|
-| 1 | Explorar ficheros y directorios | RF-FIC-01 | Implementado |
-| 2 | Importar productos desde JSON (Gson) | RF-FIC-02 | Implementado |
-| 3 | Importar productos desde XML (DOM) | RF-FIC-03 | Implementado |
-| 4.1 | Listar todos los productos | RF-FIC-04 | Implementado |
-| 4.2 | Buscar producto por código | RF-FIC-04 | Implementado |
-| 4.3 | Buscar productos por nombre | RF-FIC-04 | Implementado |
-| 5.1 / 5.2 | Exportar productos a JSON (Gson) / XML (DOM) | RF-FIC-05 | Implementado |
-| 6.1 / 6.2 | Guardar / recuperar inventario (.dat, serialización) | RF-FIC-06 | Implementado |
-| Independiente | Consultas XPath (`complementarias.rf07.App`) | RF-FIC-07 | Implementado |
-| Independiente | Acceso aleatorio con `RandomAccessFile` (`complementarias.rf08.App`) | RF-FIC-08 | Implementado |
+| Opción | Función | Requisito |
+|---|---|---|
+| 1 | Explorar ficheros y directorios | RF-FIC-01 |
+| 2 / 3 | Importar productos desde JSON / XML | RF-FIC-02 / 03 |
+| 4 | Consultar productos en memoria | RF-FIC-04 |
+| 5 | Exportar a JSON / XML | RF-FIC-05 |
+| 6 | Guardar / recuperar inventario (.dat) | RF-FIC-06 |
+| **7** | **Gestionar base de datos MySQL** | **RF-JDBC** |
+| 7.1 | Comprobar conexión e información de la BD | RF-JDBC-01 |
+| 7.2 / 7.3 | Categorías / proveedores | RF-JDBC-02 |
+| 7.4 | Productos (CRUD) | RF-JDBC-03 |
+| 7.5 | Consultas (JOIN, LIKE, umbral de stock) | RF-JDBC-04 |
+| 7.6 | Entrada o salida de stock (procedimiento almacenado) | RF-JDBC-05 |
+| 7.7 | Historial de movimientos | RF-JDBC-06 |
+| 7.8 | Copiar productos de memoria a MySQL (transacción) | RF-JDBC-07 |
+| 7.9 | Demostración de commit y rollback | RF-JDBC-08 |
 
-## 4. Estructura del proyecto
+## 6. Memoria y MySQL
+
+Son **dos almacenes distintos**. Las opciones 1–6 usan el inventario en memoria, que se pierde al cerrar salvo que se guarde con la opción 6. La opción 7 lee y escribe directamente en MySQL, y sus datos se conservan entre ejecuciones. **No hay sincronización automática:** solo la opción 7.8 copia a MySQL los productos válidos de la memoria, sin modificar la memoria.
+
+La demostración 7.9 usa las categorías de prueba 9001 y 9002. Para borrarlas: `DELETE FROM categoria WHERE id IN (9001, 9002);`
+
+## 7. Estructura
 
 ```text
-DataStock_UT1_Proyecto_Inicial/
-├── pom.xml
-├── README.md
-├── DataStock_UT1_Registro_Pruebas.odt    # Registro de pruebas ejecutadas
-├── evidencias/                           # Capturas de cada prueba (CP-xxx.png)
-├── datos/
-│   ├── ejemplos/                         # Catálogos facilitados por la profesora
-│   ├── pruebas/
-│   │   ├── explorar/                     # RF-FIC-01
-│   │   ├── json/                         # RF-FIC-02
-│   │   ├── xml/                          # RF-FIC-03
-│   │   ├── serializacion/                # RF-FIC-06
-│   │   ├── xpath/                        # RF-FIC-07
-│   │   └── acceso_aleatorio/             # RF-FIC-08
-│   └── salidas/
-├── material_referencia/                  # Modelo relacional y script SQL (UT2)
-└── src/main/java/es/iesisidra/datastock/
-    ├── App.java                          # Punto de entrada
-    ├── ficheros/
-    │   ├── ExploradorFicheros.java       # RF-FIC-01 (NIO.2)
-    │   ├── ImportadorJson.java           # RF-FIC-02 (Gson)
-    │   ├── ImportadorXml.java            # RF-FIC-03 (DOM, protegido frente a XXE)
-    │   ├── ExportadorProductos.java      # RF-FIC-05 (Gson y DOM, UTF-8, ordenado por código)
-    │   └── SerializadorInventario.java   # RF-FIC-06 (ObjectOutputStream / ObjectInputStream)
-    ├── servicio/
-    │   ├── Inventario.java               # Colección común: alta sin duplicados, búsquedas y sustitución
-    │   ├── ValidadorProducto.java        # Reglas comunes de validación (JSON y XML)
-    │   └── ResultadoImportacion.java     # Contadores e incidencias de una importación
-    ├── ui/
-    │   └── MenuPrincipal.java            # Menús: solo piden datos y delegan
-    ├── modelo/                           # Producto, Categoria, Proveedor, MovimientoStock
-    ├── util/                             # LectorConsola, ColoresConsola
-    └── complementarias/                  # Actividades independientes del menú
-        ├── rf07/                         # RF-FIC-07 · XPath
-        │   ├── App.java                  # Punto de entrada
-        │   ├── MenuXPath.java            # Pide datos y muestra resultados
-        │   └── ConsultasXPath.java       # Las cuatro consultas con XPath
-        └── rf08/                         # RF-FIC-08 · RandomAccessFile
-            ├── App.java                  # Punto de entrada
-            ├── MenuAccesoAleatorio.java  # Pide datos y muestra resultados
-            └── FicheroStock.java         # Registros de 36 bytes con seek()
+src/main/java/es/iesisidra/datastock/
+├── App.java
+├── config/          ConexionBD (lee db.properties)
+├── dao/             CategoriaDAO, ProveedorDAO, ProductoDAO, MovimientoDAO (todo el SQL)
+├── ficheros/        UT1: importar, exportar, serializar
+├── servicio/        Inventario, ValidadorProducto, ValidadorProductoBD
+├── ui/              MenuPrincipal, MenuMySQL y un menú por cada opción de la 7
+├── modelo/          Producto, Categoria, Proveedor, MovimientoStock, ProductoDetalle
+├── util/            LectorConsola, ColoresConsola
+└── complementarias/ rf07 (XPath), rf08 (RandomAccessFile), DemoSQLite
 ```
 
-## 5. Reglas aplicadas en la importación
+## 8. Comparativa MySQL y SQLite
 
-- **JSON:** raíz de tipo objeto con el array `productos`. **XML:** raíz `catalogo` con elementos `producto`.
-- Si el documento está mal formado, tiene una raíz incorrecta o (en XML) contiene una DTD, **se cancela la importación completa** y el inventario no cambia.
-- Si el documento es correcto pero algunos productos no lo son, **se importan solo los válidos** y se muestra el motivo de cada rechazo.
-- Validaciones de cada producto (las mismas en JSON y XML, en `ValidadorProducto`):
-  - `codigo`: obligatorio, máximo 12 caracteres, solo letras, números y guiones.
-  - `nombre`: obligatorio, entre 3 y 100 caracteres.
-  - `precio`: mayor que 0 (se guarda como `BigDecimal`).
-  - `stock`: entero mayor o igual que 0.
-  - `categoriaId` y `proveedorId`: enteros positivos.
-- Los códigos **no se duplican** (ni en memoria ni dentro del mismo fichero), sin distinguir mayúsculas y sin espacios extremos. Un producto duplicado se rechaza y no sustituye al existente.
-- Importar **añade** productos: la colección no se vacía antes.
-
-## 5.1. Exportación
-
-- Se exportan todos los productos en memoria, **ordenados por código** y en **UTF-8**.
-- JSON con raíz `{"productos": [...]}`; XML con `catalogo/producto/campos` y sangría.
-- Antes de escribir se comprueba que hay productos, que la ruta no está vacía, que el directorio de destino existe y que se puede escribir. Si el fichero ya existe, se pide confirmación.
-- No hay conversor directo JSON↔XML: el modelo intermedio es la colección de objetos `Producto`.
-
-## 5.2. Serialización (RF-FIC-06)
-
-- **Guardar** escribe la colección completa en un `.dat` con `ObjectOutputStream`. Si el inventario está vacío no se crea ningún fichero; si el fichero existe, se pide confirmación.
-- **Recuperar** lee el `.dat` con `ObjectInputStream`, comprueba que es una lista de `Producto` válidos y **sustituye** el inventario, con confirmación si ya hay productos en memoria.
-- Un filtro de deserialización (`ObjectInputFilter`) solo admite las clases que guarda DataStock, para no deserializar ficheros de procedencia desconocida.
-- Si el fichero está dañado o no es compatible, el inventario en memoria no cambia.
-
-## 5.3. Actividades independientes
-
-- **RF-FIC-07 · XPath:** abre un catálogo XML (rechaza DTD) y permite buscar por código, filtrar por categoría, filtrar por precio estrictamente superior y contar productos con `count()`. Los textos del usuario no se concatenan en las expresiones XPath: se seleccionan los nodos y sus valores se comparan en Java.
-- **RF-FIC-08 · Acceso aleatorio:** carga un catálogo JSON o XML y genera `stock.bin` con registros de 36 bytes (código 12 caracteres = 24 bytes, precio `double` = 8 bytes, stock `int` = 4 bytes). Consulta un registro con `seek(posición × 36)` y modifica solo el stock con `seek(posición × 36 + 32)`. `stock.bin` es una copia independiente: sus cambios no afectan a los productos en memoria.
-
-**Decisión propia:** el patrón del código admite también minúsculas (`[A-Za-z0-9-]+`), porque el enunciado indica que los códigos se comparan sin distinguir mayúsculas.
-
-## 6. Pruebas
-
-Las pruebas ejecutadas están documentadas en `DataStock_UT1_Registro_Pruebas.odt`, con sus capturas en `evidencias/`:
-
-| Requisito | Pruebas | Estado |
+| | MySQL | SQLite |
 |---|---|---|
-| RF-FIC-01 | CP-FIC-01 a 03 | Superadas |
-| RF-FIC-02 | CP-JSON-01 a 04 | Superadas |
-| RF-FIC-03 | CP-XML-01 a 04 | Superadas |
-| RF-FIC-04 | CP-CON-01 a 04 | Superadas (CP-CON-04 repetida importando JSON y XML) |
-| RF-FIC-05 | CP-EXP-01 a 05 | Superadas |
-| RF-FIC-06 | CP-SER-01 a 04 | Superadas |
-| RF-FIC-07 | CP-XPATH-01 a 05 | Superadas |
-| RF-FIC-08 | CP-RAF-01 a 05 | Superadas |
+| ¿Necesita servidor? | Sí, un servicio aparte | No, está embebido en la aplicación |
+| ¿Dónde se guardan los datos? | En el servidor | En un fichero (`datos/sqlite/productos_demo.db`) |
+| Conexión JDBC | `jdbc:mysql://localhost:3306/datastock` + usuario y contraseña | `jdbc:sqlite:datos/sqlite/productos_demo.db`, sin credenciales |
+| Dependencia | `mysql-connector-j` 9.1.0 | `sqlite-jdbc` 3.46.1.3 |
+| Ventajas | Multiusuario, acceso por red, permisos, procedimientos almacenados | Sin instalación, ligero, un solo fichero portable |
+| Inconvenientes | Hay que instalarlo y mantenerlo | Escritura concurrente limitada, sin usuarios ni permisos |
+| Lo elegiría para | Aplicaciones multiusuario o web (como DataStock) | Aplicaciones locales, de escritorio o móviles, y prototipos |
 
-## 7. Entrega
+**Pool de conexiones:** mantiene varias conexiones abiertas y las reutiliza, en lugar de abrir una nueva para cada operación. Es útil cuando hay muchas peticiones a la vez, como en un servidor web. DataStock es de consola y tiene un solo usuario, así que le bastan **conexiones cortas**, que cada operación abre y cierra con try-with-resources.
 
-La versión entregada en plazo de la UT1 se identifica con la etiqueta Git **`v1.1-UT1`** 
+## 9. Pruebas y entrega
+
+Las pruebas están en `DataStock_UT1_Registro_Pruebas.odt`, con las capturas en `evidencias/`. Las etiquetas de entrega son `v1.1-UT1` (UT1) y **`UT2-v1.0`** (UT2).
