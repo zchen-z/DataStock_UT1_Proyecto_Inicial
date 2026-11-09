@@ -24,6 +24,7 @@ public class MenuMySQL {
     private final MenuProveedores menuProveedores = new MenuProveedores();
     private final MenuProductos menuProductos = new MenuProductos();
     private final MenuConsultasBD menuConsultasBD = new MenuConsultasBD();
+    private final MenuMovimientos menuMovimientos = new MenuMovimientos();
 
     /** @param inventario inventario en memoria de la UT1 */
     public MenuMySQL(Inventario inventario) {
@@ -52,6 +53,7 @@ public class MenuMySQL {
                 case 3 -> menuProveedores.iniciar();
                 case 4 -> menuProductos.iniciar();
                 case 5 -> menuConsultasBD.iniciar();
+                case 6 -> menuMovimientos.iniciar();    
                 default -> aviso("Opción pendiente de implementar.");
             }
         } while (opcion != 0);
