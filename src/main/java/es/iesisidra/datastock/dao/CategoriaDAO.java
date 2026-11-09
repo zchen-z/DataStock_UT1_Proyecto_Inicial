@@ -17,16 +17,25 @@ import es.iesisidra.datastock.modelo.Categoria;
 public class CategoriaDAO {
 
     /**
-     * Inserta una categoría nueva.
+     * Inserta una categoría con su propia conexión (alta individual, opción 7.2).
      *
-     * @param c categoría ya validada
      * @throws SQLException si MySQL rechaza la inserción
      */
     public void insertar(Categoria c) throws SQLException {
-        try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement("INSERT INTO categoria (id, nombre) VALUES (?, ?)")) {
-            ps.setInt(1, c.getId());       // primer ?
-            ps.setString(2, c.getNombre()); // segundo ?
+        try (Connection con = ConexionBD.obtenerConexion()) {
+            insertar(con, c);
+        }
+    }
+
+    /**
+     * Inserta una categoría usando una conexión ya abierta (para transacciones).
+     *
+     * @throws SQLException si MySQL rechaza la inserción
+     */
+    public void insertar(Connection con, Categoria c) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement("INSERT INTO categoria (id, nombre) VALUES (?, ?)")) {
+            ps.setInt(1, c.getId());
+            ps.setString(2, c.getNombre());
             ps.executeUpdate();
         }
     }
@@ -38,8 +47,8 @@ public class CategoriaDAO {
     public List<Categoria> listar() throws SQLException {
         List<Categoria> lista = new ArrayList<>();
         try (Connection con = ConexionBD.obtenerConexion();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery("SELECT id, nombre FROM categoria ORDER BY id")) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery("SELECT id, nombre FROM categoria ORDER BY id")) {
             while (rs.next()) { // una vuelta por fila
                 lista.add(new Categoria(rs.getInt("id"), rs.getString("nombre")));
             }
@@ -55,7 +64,7 @@ public class CategoriaDAO {
     public Categoria buscarPorId(int id) throws SQLException {
         Categoria c = null;
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement("SELECT id, nombre FROM categoria WHERE id = ?")) {
+                PreparedStatement ps = con.prepareStatement("SELECT id, nombre FROM categoria WHERE id = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -70,14 +79,16 @@ public class CategoriaDAO {
      * Comprueba si otra categoría ya usa ese nombre.
      *
      * @param nombre     nombre a comprobar
-     * @param idExcluido ID que no se cuenta (la propia categoría al modificar; 0 en el alta)
+     * @param idExcluido ID que no se cuenta (la propia categoría al modificar; 0 en
+     *                   el alta)
      * @return true si el nombre ya está en uso
      * @throws SQLException si falla la consulta
      */
     public boolean existeNombre(String nombre, int idExcluido) throws SQLException {
         boolean existe;
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) FROM categoria WHERE nombre = ? AND id <> ?")) {
+                PreparedStatement ps = con
+                        .prepareStatement("SELECT COUNT(*) FROM categoria WHERE nombre = ? AND id <> ?")) {
             ps.setString(1, nombre);
             ps.setInt(2, idExcluido);
             try (ResultSet rs = ps.executeQuery()) {
@@ -95,7 +106,7 @@ public class CategoriaDAO {
     public boolean modificarNombre(int id, String nombre) throws SQLException {
         boolean modificada;
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement("UPDATE categoria SET nombre = ? WHERE id = ?")) {
+                PreparedStatement ps = con.prepareStatement("UPDATE categoria SET nombre = ? WHERE id = ?")) {
             ps.setString(1, nombre);
             ps.setInt(2, id);
             modificada = ps.executeUpdate() == 1; // nº de filas afectadas
@@ -110,10 +121,33 @@ public class CategoriaDAO {
     public boolean eliminar(int id) throws SQLException {
         boolean eliminada;
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM categoria WHERE id = ?")) {
+                PreparedStatement ps = con.prepareStatement("DELETE FROM categoria WHERE id = ?")) {
             ps.setInt(1, id);
             eliminada = ps.executeUpdate() == 1;
         }
         return eliminada;
+    }
+
+    /**
+     * Inserta varias categorías en una única transacción: o se guardan todas o
+     * ninguna.
+     *
+     * @throws SQLException si falla alguna inserción (ya se ha hecho rollback)
+     */
+    public void insertarLote(List<Categoria> categorias) throws SQLException {
+        try (Connection con = ConexionBD.obtenerConexion()) {
+            con.setAutoCommit(false); // empieza la transacción
+            try {
+                for (Categoria c : categorias) {
+                    insertar(con, c);
+                }
+                con.commit(); // todo bien: se confirman todas
+            } catch (SQLException e) {
+                con.rollback(); // algo falló: se deshacen todas
+                throw e;
+            } finally {
+                con.setAutoCommit(true); // se restaura autoCommit
+            }
+        }
     }
 }
