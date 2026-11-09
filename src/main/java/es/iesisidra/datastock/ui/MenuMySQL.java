@@ -26,10 +26,12 @@ public class MenuMySQL {
     private final MenuConsultasBD menuConsultasBD = new MenuConsultasBD();
     private final MenuMovimientos menuMovimientos = new MenuMovimientos();
     private final MenuHistorial menuHistorial = new MenuHistorial();
+    private final MenuImportacionBD menuImportacion;
 
     /** @param inventario inventario en memoria de la UT1 */
     public MenuMySQL(Inventario inventario) {
         this.inventario = inventario;
+        this.menuImportacion = new MenuImportacionBD(inventario);
     }
 
     /** Muestra el menú MySQL hasta que el usuario vuelve al principal. */
@@ -56,6 +58,7 @@ public class MenuMySQL {
                 case 5 -> menuConsultasBD.iniciar();
                 case 6 -> menuMovimientos.iniciar();    
                 case 7 -> menuHistorial.iniciar();
+                case 8 -> menuImportacion.iniciar();
                 default -> aviso("Opción pendiente de implementar.");
             }
         } while (opcion != 0);

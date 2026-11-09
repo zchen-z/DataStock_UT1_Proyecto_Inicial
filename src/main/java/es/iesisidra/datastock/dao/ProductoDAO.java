@@ -44,19 +44,27 @@ public class ProductoDAO {
     }
 
     /**
-     * Inserta un producto nuevo.
+     * Inserta un producto con su propia conexión (alta individual, opción 7.4).
      *
-     * @param p producto ya validado
      * @throws SQLException si MySQL rechaza la inserción
      */
     public void insertar(Producto p) throws SQLException {
-        try (Connection con = ConexionBD.obtenerConexion();
-                PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO producto (codigo, nombre, precio, stock, categoria_id, proveedor_id) "
-                                + "VALUES (?, ?, ?, ?, ?, ?)")) {
+        try (Connection con = ConexionBD.obtenerConexion()) {
+            insertar(con, p);
+        }
+    }
+
+    /**
+     * Inserta un producto usando una conexión ya abierta (para transacciones).
+     *
+     * @throws SQLException si MySQL rechaza la inserción
+     */
+    public void insertar(Connection con, Producto p) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO producto (codigo, nombre, precio, stock, categoria_id, proveedor_id) VALUES (?, ?, ?, ?, ?, ?)")) {
             ps.setString(1, p.getCodigo());
             ps.setString(2, p.getNombre());
-            ps.setBigDecimal(3, p.getPrecio()); // dinero exacto
+            ps.setBigDecimal(3, p.getPrecio());
             ps.setInt(4, p.getStock());
             ps.setInt(5, p.getCategoriaId());
             ps.setInt(6, p.getProveedorId());
@@ -196,5 +204,28 @@ public class ProductoDAO {
             }
         }
         return lista;
+    }
+
+        /**
+     * Inserta varios productos en una única transacción: o se guardan todos o ninguno.
+     *
+     * @param productos productos ya validados
+     * @throws SQLException si falla alguna inserción (ya se ha hecho rollback)
+     */
+    public void insertarLote(List<Producto> productos) throws SQLException {
+        try (Connection con = ConexionBD.obtenerConexion()) {
+            con.setAutoCommit(false);        // empieza la transacción
+            try {
+                for (Producto p : productos) {
+                    insertar(con, p);
+                }
+                con.commit();                // todo bien: se confirman todas
+            } catch (SQLException e) {
+                con.rollback();              // algo falló: se deshacen todas
+                throw e;                     // el menú informa del error
+            } finally {
+                con.setAutoCommit(true);     // se deja como estaba
+            }
+        }
     }
 }

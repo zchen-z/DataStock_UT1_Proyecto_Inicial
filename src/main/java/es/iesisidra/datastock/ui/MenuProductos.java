@@ -6,16 +6,16 @@ import es.iesisidra.datastock.dao.ProveedorDAO;
 import es.iesisidra.datastock.modelo.Categoria;
 import es.iesisidra.datastock.modelo.Producto;
 import es.iesisidra.datastock.modelo.Proveedor;
-import es.iesisidra.datastock.servicio.ValidadorProducto;
+import es.iesisidra.datastock.servicio.ValidadorProductoBD;
 import es.iesisidra.datastock.util.LectorConsola;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.List;
 
 import static es.iesisidra.datastock.util.ColoresConsola.aviso;
 import static es.iesisidra.datastock.util.ColoresConsola.error;
 import static es.iesisidra.datastock.util.ColoresConsola.ok;
+
 
 /**
  * Opción 7.4 · RF-JDBC-03: alta, consulta, modificación y baja de productos en
@@ -27,7 +27,8 @@ public class MenuProductos {
     private final ProductoDAO dao = new ProductoDAO();
     private final CategoriaDAO categoriaDAO = new CategoriaDAO();
     private final ProveedorDAO proveedorDAO = new ProveedorDAO();
-    private final ValidadorProducto validador = new ValidadorProducto();
+    private final ValidadorProductoBD validadorBD = new ValidadorProductoBD();
+
 
     /** Muestra el menú de productos hasta volver al menú MySQL. */
     public void iniciar() {
@@ -77,7 +78,7 @@ public class MenuProductos {
         }
         Producto p = new Producto(codigo, nombre, precio, stock, categoria, proveedor);
         if (problema == null) {
-            problema = comprobar(p);
+            problema = validadorBD.comprobar(p);
         }
         if (problema == null && dao.buscarPorCodigo(codigo) != null) {
             problema = "ya existe un producto con el código " + codigo;
@@ -135,7 +136,7 @@ public class MenuProductos {
                 problema = "precio, categoría y proveedor deben ser números";
             }
             if (problema == null) {
-                problema = comprobar(p); // se valida otra vez todo
+                problema = validadorBD.comprobar(p); // se valida otra vez todo
             }
             if (problema != null) {
                 error(problema);
@@ -179,26 +180,7 @@ public class MenuProductos {
         }
     }
 
-    /**
-     * Valida los datos (reglas de la UT1 + 2 decimales) y que existan la categoría
-     * y el proveedor.
-     *
-     * @return el motivo del rechazo, o null si el producto se puede guardar
-     */
-    private String comprobar(Producto p) throws SQLException {
-        List<String> errores = validador.validar(p);
-        String problema = null;
-        if (!errores.isEmpty()) {
-            problema = String.join("; ", errores);
-        }
-        if (problema == null && categoriaDAO.buscarPorId(p.getCategoriaId()) == null) {
-            problema = "no existe la categoría con ID " + p.getCategoriaId();
-        }
-        if (problema == null && proveedorDAO.buscarPorId(p.getProveedorId()) == null) {
-            problema = "no existe el proveedor con ID " + p.getProveedorId();
-        }
-        return problema;
-    }
+    
 
     /**
      * Imprime todos los datos del producto con los nombres de categoría y
