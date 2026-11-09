@@ -26,4 +26,19 @@ public final class ColoresConsola {
     public static String pintar(String texto, String color) {
         return habilitados() ? color + texto + RESET : texto;
     }
+
+        /** Mensaje de operación correcta en verde. */
+    public static void ok(String texto) {
+        System.out.println(pintar("[OK] " + texto, VERDE));
+    }
+
+    /** Mensaje de error en rojo. */
+    public static void error(String texto) {
+        System.out.println(pintar("[ERROR] " + texto, ROJO));
+    }
+
+    /** Aviso en amarillo. */
+    public static void aviso(String texto) {
+        System.out.println(pintar("[AVISO] " + texto, AMARILLO));
+    }
 }

@@ -1,14 +1,16 @@
 package es.iesisidra.datastock.ui;
 
-import es.iesisidra.datastock.config.ConexionBD;
-import es.iesisidra.datastock.dao.ProductoDAO;
-import es.iesisidra.datastock.servicio.Inventario;
-import es.iesisidra.datastock.util.ColoresConsola;
-import es.iesisidra.datastock.util.LectorConsola;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
+import es.iesisidra.datastock.config.ConexionBD;
+import es.iesisidra.datastock.dao.ProductoDAO;
+import es.iesisidra.datastock.servicio.Inventario;
+import static es.iesisidra.datastock.util.ColoresConsola.aviso;
+import static es.iesisidra.datastock.util.ColoresConsola.error;
+import static es.iesisidra.datastock.util.ColoresConsola.ok;
+import es.iesisidra.datastock.util.LectorConsola;
 
 /**
  * Opción 7 del menú principal: funcionalidades de MySQL (UT2).
@@ -17,6 +19,7 @@ public class MenuMySQL {
 
     private final Inventario inventario; // se usará en la opción 7.8
     private final ProductoDAO productoDAO = new ProductoDAO();
+    private final MenuCategorias menuCategorias = new MenuCategorias();
 
     /** @param inventario inventario en memoria de la UT1 */
     public MenuMySQL(Inventario inventario) {
@@ -41,7 +44,7 @@ public class MenuMySQL {
             opcion = LectorConsola.leerOpcion("Selecciona una opción: ", 0, 9);
             switch (opcion) {
                 case 1 -> comprobarConexion();
-                case 0 -> { }
+                case 2 -> menuCategorias.iniciar();
                 default -> aviso("Opción pendiente de implementar.");
             }
         } while (opcion != 0);
@@ -62,18 +65,5 @@ public class MenuMySQL {
         LectorConsola.pausar();
     }
 
-    /** Mensaje de éxito en verde. */
-    private void ok(String texto) {
-        System.out.println(ColoresConsola.pintar("[OK] " + texto, ColoresConsola.VERDE));
-    }
-
-    /** Mensaje de error en rojo. */
-    private void error(String texto) {
-        System.out.println(ColoresConsola.pintar("[ERROR] " + texto, ColoresConsola.ROJO));
-    }
-
-    /** Aviso en amarillo. */
-    private void aviso(String texto) {
-        System.out.println(ColoresConsola.pintar("[AVISO] " + texto, ColoresConsola.AMARILLO));
-    }
+    
 }
