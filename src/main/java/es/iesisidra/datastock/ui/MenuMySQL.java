@@ -20,6 +20,7 @@ public class MenuMySQL {
     private final Inventario inventario; // se usará en la opción 7.8
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final MenuCategorias menuCategorias = new MenuCategorias();
+    private final MenuProveedores menuProveedores = new MenuProveedores();
 
     /** @param inventario inventario en memoria de la UT1 */
     public MenuMySQL(Inventario inventario) {
@@ -45,6 +46,7 @@ public class MenuMySQL {
             switch (opcion) {
                 case 1 -> comprobarConexion();
                 case 2 -> menuCategorias.iniciar();
+                case 3 -> menuProveedores.iniciar();
                 default -> aviso("Opción pendiente de implementar.");
             }
         } while (opcion != 0);
