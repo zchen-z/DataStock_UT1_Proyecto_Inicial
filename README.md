@@ -1,8 +1,8 @@
-# DataStock – Acceso a Datos (UT1 y UT2)
+# DataStock – Acceso a Datos (UT1, UT2 y UT3)
 
 **2.º DAM · IES Isidra de Guzmán · 2026–2027** · Java 21 · Maven · consola
 
-Aplicación de consola para gestionar un inventario. La **UT1** trabaja con ficheros y un inventario **en memoria** (opciones 1–6). La **UT2** añade la opción **7**, que trabaja con **MySQL** mediante **JDBC**.
+Aplicación de consola para gestionar un inventario. La **UT1** trabaja con ficheros y un inventario **en memoria** (opciones 1–6). La **UT2** añade la opción **7**, que trabaja con **MySQL** mediante **JDBC**. La **UT3** separa dos funciones en **componentes reutilizables**.
 
 ## 1. Requisitos
 
@@ -48,7 +48,7 @@ mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.DemoSQLite
 | Opción | Función | Requisito |
 |---|---|---|
 | 1 | Explorar ficheros y directorios | RF-FIC-01 |
-| 2 / 3 | Importar productos desde JSON / XML | RF-FIC-02 / 03 |
+| 2 / 3 | Importar productos desde JSON / XML (la 2 usa `LectorProductosJson`, UT3) | RF-FIC-02 / 03 |
 | 4 | Consultar productos en memoria | RF-FIC-04 |
 | 5 | Exportar a JSON / XML | RF-FIC-05 |
 | 6 | Guardar / recuperar inventario (.dat) | RF-FIC-06 |
@@ -56,7 +56,7 @@ mvn exec:java -Dexec.mainClass=es.iesisidra.datastock.complementarias.DemoSQLite
 | 7.1 | Comprobar conexión e información de la BD | RF-JDBC-01 |
 | 7.2 / 7.3 | Categorías / proveedores | RF-JDBC-02 |
 | 7.4 | Productos (CRUD) | RF-JDBC-03 |
-| 7.5 | Consultas (JOIN, LIKE, umbral de stock) | RF-JDBC-04 |
+| 7.5 | Consultas (JOIN, LIKE, umbral de stock); la 7.5.2 usa `ProductoDAO.buscarDetalle`, UT3 | RF-JDBC-04 |
 | 7.6 | Entrada o salida de stock (procedimiento almacenado) | RF-JDBC-05 |
 | 7.7 | Historial de movimientos | RF-JDBC-06 |
 | 7.8 | Copiar productos de memoria a MySQL (transacción) | RF-JDBC-07 |
@@ -75,7 +75,7 @@ src/main/java/es/iesisidra/datastock/
 ├── App.java
 ├── config/          ConexionBD (lee db.properties)
 ├── dao/             CategoriaDAO, ProveedorDAO, ProductoDAO, MovimientoDAO (todo el SQL)
-├── ficheros/        UT1: importar, exportar, serializar
+├── ficheros/        UT1: importar, exportar, serializar · UT3: LectorProductosJson
 ├── servicio/        Inventario, ValidadorProducto, ValidadorProductoBD
 ├── ui/              MenuPrincipal, MenuMySQL y un menú por cada opción de la 7
 ├── modelo/          Producto, Categoria, Proveedor, MovimientoStock, ProductoDetalle
@@ -97,6 +97,23 @@ src/main/java/es/iesisidra/datastock/
 
 **Pool de conexiones:** mantiene varias conexiones abiertas y las reutiliza, en lugar de abrir una nueva para cada operación. Es útil cuando hay muchas peticiones a la vez, como en un servidor web. DataStock es de consola y tiene un solo usuario, así que le bastan **conexiones cortas**, que cada operación abre y cierra con try-with-resources.
 
-## 9. Pruebas y entrega
+## 9. UT3: componentes reutilizables
 
-Las pruebas están en `DataStock_UT1_Registro_Pruebas.odt`, con las capturas en `evidencias/`. Las etiquetas de entrega son `v1.1-UT1` (UT1) y **`UT2-v1.0`** (UT2).
+| Componente | Entrada | Salida | Usado en |
+|---|---|---|---|
+| `ficheros/LectorProductosJson` → `leer(ruta)` | Ruta del JSON | `ResultadoImportacion` con los productos válidos y los errores | Opción **2** (importar JSON) |
+| `dao/ProductoDAO` → `buscarDetalle(codigo)` | Código | La ficha del producto, o `null` si no existe | Opción **7.5.2** (buscar por código) |
+
+Ninguno de los dos componentes escribe en la consola ni lee del teclado: **el menú** muestra `[OK]` en verde, `[ERROR]` en rojo o `[AVISO]` en amarillo. Para la consulta JDBC se ha reutilizado el DAO de la UT2 en lugar de crear una clase nueva, porque el enunciado pide no duplicar clases. El antiguo `ImportadorJson` se ha sustituido por `LectorProductosJson`, que ya no añade nada al inventario: lo hace el menú.
+
+**¿Qué se gana y qué cuesta separar la lectura del JSON del menú?** Se gana que el lector se puede reutilizar (lo usan la opción 2 y la actividad RF-08) y probar sin la consola, y que cada clase tiene una sola tarea. Cuesta una clase más y que el menú tenga que recorrer el resultado para añadir los productos y mostrar el resumen.
+
+**¿Por qué separar la consulta JDBC de la presentación?** Así el mismo método sirve para la consola, para una interfaz gráfica o para una prueba. Además, el SQL queda en un solo sitio (el DAO) y, si cambia la base de datos, no hay que tocar los menús.
+
+**Herramientas:** **VS Code** con Extension Pack for Java para editar, ejecutar y depurar. **Maven** gestiona las dependencias (Gson y los conectores) y compila el proyecto (`mvn clean compile`). **Javadoc** documenta las clases y los métodos públicos de los componentes (propósito, parámetros, resultado y errores). No se ha usado JUnit, porque era opcional.
+
+**Opciones modificadas:** la **2** (importar productos desde JSON) y la **7.5.2** (buscar producto por código en MySQL).
+
+## 10. Pruebas y entrega
+
+Las pruebas están en `DataStock_UT1_Registro_Pruebas.odt`, con las capturas en `evidencias/`. Las etiquetas de entrega son `v1.1-UT1` (UT1), `UT2-v1.0` (UT2) y **`UT3-v1.0`** (UT3).
