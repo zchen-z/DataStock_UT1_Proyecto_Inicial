@@ -14,6 +14,10 @@ import java.util.List;
 
 /**
  * Operaciones JDBC sobre la tabla producto.
+ * <p>UT3 · Es también el componente reutilizable de consulta de productos en MySQL
+ * (método {@link #buscarDetalle(String)}): obtiene la conexión de {@code ConexionBD},
+ * usa PreparedStatement y ResultSet, cierra los recursos con try-with-resources y
+ * no imprime nada en consola. El menú se encarga de mostrar el resultado.</p>
  */
 public class ProductoDAO {
 
@@ -143,9 +147,12 @@ public class ProductoDAO {
     }
 
     /**
-     * @param codigo código ya normalizado
-     * @return la ficha del producto, o null si no existe
-     * @throws SQLException si falla la consulta
+     * UT3 · Componente de consulta: busca un producto por su código exacto.
+     *
+     * @param codigo código del producto, ya normalizado a mayúsculas
+     * @return la ficha del producto con los nombres de su categoría y proveedor,
+     *         o {@code null} si no existe ningún producto con ese código
+     * @throws SQLException si no se puede conectar con MySQL o falla la consulta
      */
     public ProductoDetalle buscarDetalle(String codigo) throws SQLException {
         ProductoDetalle detalle = null;

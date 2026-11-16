@@ -6,10 +6,10 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
 
-import es.iesisidra.datastock.ficheros.ImportadorJson;
 import es.iesisidra.datastock.ficheros.ImportadorXml;
 import es.iesisidra.datastock.modelo.Producto;
 import es.iesisidra.datastock.servicio.Inventario;
+import es.iesisidra.datastock.servicio.LectorProductosJson;
 import es.iesisidra.datastock.servicio.ResultadoImportacion;
 import es.iesisidra.datastock.util.LectorConsola;
 
@@ -22,7 +22,7 @@ public class MenuAccesoAleatorio {
 
     private final Inventario inventario;
     private final FicheroStock ficheroStock = new FicheroStock();
-    private final ImportadorJson importadorJson = new ImportadorJson();
+    private final LectorProductosJson lectorJson = new LectorProductosJson();
     private final ImportadorXml importadorXml = new ImportadorXml();
     private Path fichero;
 
@@ -62,7 +62,10 @@ public class MenuAccesoAleatorio {
             if (ruta.toLowerCase().endsWith(".xml")) {
                 resultado = importadorXml.importar(ruta, inventario);
             } else {
-                resultado = importadorJson.importar(ruta, inventario);
+                resultado = lectorJson.leer(ruta);
+                for (Producto p : resultado.getValidos()) {
+                    inventario.agregar(p);
+                }
             }
             if (resultado.documentoValido()) {
                 System.out.println("Productos cargados en memoria: " + inventario.getProductos().size());

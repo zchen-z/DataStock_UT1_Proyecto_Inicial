@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import es.iesisidra.datastock.config.ConexionBD;
 import es.iesisidra.datastock.dao.ProductoDAO;
 import es.iesisidra.datastock.servicio.Inventario;
-import static es.iesisidra.datastock.util.ColoresConsola.aviso;
 import static es.iesisidra.datastock.util.ColoresConsola.error;
 import static es.iesisidra.datastock.util.ColoresConsola.ok;
 import es.iesisidra.datastock.util.LectorConsola;

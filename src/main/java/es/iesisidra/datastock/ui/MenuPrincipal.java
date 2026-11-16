@@ -7,8 +7,8 @@ import java.util.List;
 
 import es.iesisidra.datastock.ficheros.ExploradorFicheros;
 import es.iesisidra.datastock.ficheros.ExportadorProductos;
-import es.iesisidra.datastock.ficheros.ImportadorJson;
 import es.iesisidra.datastock.ficheros.ImportadorXml;
+import es.iesisidra.datastock.ficheros.LectorProductosJson;
 import es.iesisidra.datastock.ficheros.SerializadorInventario;
 import es.iesisidra.datastock.modelo.Producto;
 import es.iesisidra.datastock.servicio.Inventario;
@@ -28,7 +28,7 @@ public class MenuPrincipal {
 
     private final Inventario inventario;
     private final ExploradorFicheros explorador = new ExploradorFicheros();
-    private final ImportadorJson importadorJson = new ImportadorJson();
+    private final LectorProductosJson lectorJson = new LectorProductosJson(); // UT3: componente JSON
     private final ImportadorXml importadorXml = new ImportadorXml();
     private final ExportadorProductos exportador = new ExportadorProductos();
     private final SerializadorInventario serializador = new SerializadorInventario();
@@ -80,13 +80,20 @@ public class MenuPrincipal {
     }
 
     /**
-     * Opción 2 · RF-FIC-02: pide la ruta, delega en ImportadorJson y muestra el
-     * resumen.
+     * Opción 2 · RF-FIC-02 / UT3: pide la ruta, llama al componente
+     * LectorProductosJson y añade al inventario los productos válidos que devuelve.
      */
     private void importarJson() {
         System.out.println("\n===== IMPORTAR JSON =====");
         String ruta = LectorConsola.leerTexto("Ruta: ");
-        ResultadoImportacion resultado = importadorJson.importar(ruta, inventario);
+        ResultadoImportacion resultado = lectorJson.leer(ruta);
+        for (Producto p : resultado.getValidos()) {
+            if (inventario.agregar(p)) {
+                resultado.anotarImportado();
+            } else {
+                resultado.anotarRechazo(p.getCodigo(), "código duplicado (ya existe en el inventario)");
+            }
+        }
         mostrarResumen(resultado);
         LectorConsola.pausar();
     }
@@ -110,20 +117,20 @@ public class MenuPrincipal {
      */
     private void mostrarResumen(ResultadoImportacion resultado) {
         if (!resultado.documentoValido()) {
-            System.out.println("ERROR: " + resultado.getErrorDocumento());
+            ColoresConsola.error(resultado.getErrorDocumento());
             System.out.println("Importación cancelada: no se ha añadido ningún producto.");
         } else {
             System.out.println("Productos encontrados: " + resultado.getEncontrados());
             System.out.println(
                     "Importados: " + resultado.getImportados() + " | Rechazados: " + resultado.getRechazados());
             if (resultado.getIncidencias().isEmpty()) {
-                System.out.println("Importación finalizada.");
+                ColoresConsola.ok("Importación finalizada.");
             } else {
                 System.out.println("INCIDENCIAS:");
                 for (String incidencia : resultado.getIncidencias()) {
                     System.out.println("- " + incidencia);
                 }
-                System.out.println("Importación finalizada con incidencias.");
+                ColoresConsola.aviso("Importación finalizada con incidencias.");
             }
         }
     }
@@ -301,7 +308,8 @@ public class MenuPrincipal {
 
     /**
      * Opción 6.1 · RF-FIC-06: guarda el inventario completo en un fichero .dat
-     * mediante serialización. Si el inventario está vacío no se crea ningún fichero.
+     * mediante serialización. Si el inventario está vacío no se crea ningún
+     * fichero.
      */
     private void guardarInventario() {
         System.out.println("\n===== GUARDAR INVENTARIO =====");
@@ -332,7 +340,8 @@ public class MenuPrincipal {
 
     /**
      * Opción 6.2 · RF-FIC-06: recupera un fichero .dat y sustituye el inventario,
-     * pidiendo confirmación si ya hay productos. Si la lectura falla, la memoria no cambia.
+     * pidiendo confirmación si ya hay productos. Si la lectura falla, la memoria no
+     * cambia.
      */
     private void recuperarInventario() {
         System.out.println("\n===== RECUPERAR INVENTARIO =====");
@@ -343,7 +352,8 @@ public class MenuPrincipal {
                 List<Producto> recuperados = serializador.recuperar(ruta);
                 boolean sustituir = true;
                 if (!inventario.getProductos().isEmpty()) {
-                    System.out.println("Actualmente hay " + inventario.getProductos().size() + " productos en memoria.");
+                    System.out
+                            .println("Actualmente hay " + inventario.getProductos().size() + " productos en memoria.");
                     System.out.println("La recuperación sustituirá el inventario actual.");
                     sustituir = LectorConsola.confirmar("¿Continuar?");
                 }

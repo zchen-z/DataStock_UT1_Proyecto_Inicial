@@ -54,7 +54,7 @@ public class MenuConsultasBD {
         }
     }
 
-    /** Búsqueda exacta por código (normalizado a mayúsculas). */
+    /** Opción 7.5.2 · UT3: búsqueda exacta por código con el componente ProductoDAO.buscarDetalle. */
     private void porCodigo() throws SQLException {
         String codigo = LectorConsola.leerTexto("Código: ").trim().toUpperCase();
         ProductoDetalle d = dao.buscarDetalle(codigo);

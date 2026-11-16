@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 
 /**
  * RF-FIC-03 · Importar un catálogo XML mediante DOM.
- * Funciona igual que ImportadorJson: mismas validaciones, mismo resultado.
+ * Mismas validaciones que LectorProductosJson.
  * El analizador se configura para rechazar DTD y entidades externas (XXE).
  */
 public class ImportadorXml {
