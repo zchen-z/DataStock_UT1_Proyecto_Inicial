@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 import es.iesisidra.datastock.ficheros.ImportadorXml;
+import es.iesisidra.datastock.ficheros.LectorProductosJson;
 import es.iesisidra.datastock.modelo.Producto;
 import es.iesisidra.datastock.servicio.Inventario;
-import es.iesisidra.datastock.servicio.LectorProductosJson;
 import es.iesisidra.datastock.servicio.ResultadoImportacion;
 import es.iesisidra.datastock.util.LectorConsola;
 
